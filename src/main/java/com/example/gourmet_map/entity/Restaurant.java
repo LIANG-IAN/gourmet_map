@@ -1,17 +1,14 @@
 package com.example.gourmet_map.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "restaurant")
 public class Restaurant {
 
   @Id
-  @Column(name = "name")
-  private String name;
+  @Column(name = "res_name")
+  private String resName;
 
   @Column(name = "address")
   private String address;
@@ -22,12 +19,15 @@ public class Restaurant {
   public Restaurant() {
   }
 
-  public String getName() {
-    return name;
+  public Restaurant(String resName, String address) {
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public String getResName() {
+    return resName;
+  }
+
+  public void setResName(String name) {
+    this.resName = name;
   }
 
   public String getAddress() {
