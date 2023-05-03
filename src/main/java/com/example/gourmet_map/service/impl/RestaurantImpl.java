@@ -1,6 +1,5 @@
 package com.example.gourmet_map.service.impl;
 
-import ch.qos.logback.core.joran.conditional.IfAction;
 import com.example.gourmet_map.constants.RtnCode;
 import com.example.gourmet_map.entity.Menu;
 import com.example.gourmet_map.entity.Restaurant;
@@ -33,16 +32,12 @@ public class RestaurantImpl implements RestaurantService {
     if (isNull(resName, address)) {
       return new RestaurantResponse(RtnCode.INPUT_NOT_ALLOWED_VALUE_ERROR.getMessage());
     }
-    // 檢查店名是否重複
-    if (rDao.existsById(resName)) {
+    // 透過SQL語法，檢查店名是否重複，並儲存至餐廳資料庫
+    int temp = rDao.addRestaurant(resName, address);
+    if (temp == 0) {
       return new RestaurantResponse(RtnCode.DUPLICATE_RESTAURANT_NAME_ERROR.getMessage());
     }
-    // 儲存至餐廳資料庫
-    Restaurant res = new Restaurant();
-    res.setResName(resName);
-    res.setAddress(address);
-    rDao.save(res);
-    return new RestaurantResponse(res, RtnCode.ADD_RESTAURANT_SUCCESS.getMessage());
+    return new RestaurantResponse(RtnCode.ADD_RESTAURANT_SUCCESS.getMessage());
   }
 
   @Override
@@ -57,7 +52,7 @@ public class RestaurantImpl implements RestaurantService {
     // 檢查是否有該店名餐廳存在
     // 僅允許先新增餐廳，再新增餐點
     Optional<Restaurant> opRes = rDao.findById(resName);
-    if (!opRes.isPresent()) {
+    if (opRes.isEmpty()) {
       return new RestaurantResponse(RtnCode.RESTAURANT_NOT_FOUND_ERROR.getMessage());
     }
     // 檢查餐廳是否有重複餐點
@@ -69,6 +64,7 @@ public class RestaurantImpl implements RestaurantService {
     List<Menu> menuList = mDao.findByResName(resName);
     // 取得餐點數量，即評價的分母
     int count = menuList.size() + 1;
+    // 檢查菜單數量不得超過3道
     if (count > 3) {
       return new RestaurantResponse(RtnCode.QUANTITY_OVER_LIMIT_ERROR.getMessage());
     }
@@ -96,11 +92,10 @@ public class RestaurantImpl implements RestaurantService {
     if (isNull(city) || index == null) {
       return new RestaurantResponse(RtnCode.INPUT_NOT_ALLOWED_VALUE_ERROR.getMessage());
     }
-
     // 輸入0或空格時顯示所有資料，為了方便輸入負數時也會顯示所有資料
     // 字轉轉成數字，並檢查是否為空格
-    int i = 0;
-    if (index.trim().isBlank() || Integer.parseInt(index) <=0){
+    int i ;
+    if (index.trim().isBlank() || Integer.parseInt(index) <= 0) {
       i = 999999;
     }
     else {
@@ -126,43 +121,46 @@ public class RestaurantImpl implements RestaurantService {
       // 菜單存入集合，帶出迴圈
       menuList.addAll(temp);
     }
-    return new RestaurantResponse(restaurantList,menuList,RtnCode.FIND_SUCCESS.getMessage());
-  }
-  @Override
-  public RestaurantResponse findRestaurantByReviewGreaterThan(double review){
-    // 判斷輸入評價1~5
-    if (review<1 || review >5){
-      return new RestaurantResponse(RtnCode.INPUT_NOT_ALLOWED_VALUE_ERROR.getMessage());
-    }
-    // 透過SQL語法取得review以上的所有餐廳及餐廳菜單
-    List<Object[]> reviewList =rDao.findRestaurantByReviewGreaterThan(review);
-    // 將獲得資料轉成字串
-    List<String> gourmetList = new ArrayList<>();
-    for (Object[] obj : reviewList) {
-      String temp = obj[0] + " " + obj[1] + " " + obj[2] + " " + obj[3] + " " + obj[4] + " " + obj[5];
-      gourmetList.add(temp);
-    }
-    return new RestaurantResponse(gourmetList,RtnCode.FIND_SUCCESS.getMessage());
-  }
-  @Override
-  public RestaurantResponse findRestaurantAndMenuByReview(double review){
-  // 判斷輸入評價1~5
-    if (review<1 || review >5){
-      return new RestaurantResponse(RtnCode.INPUT_NOT_ALLOWED_VALUE_ERROR.getMessage());
-    }
-    // 透過SQL語法取得review以上的所有餐廳及餐廳菜單
-    List<Object[]> reviewList =rDao.findRestaurantAndMenuByReview(review);
-    // 將獲得資料轉成字串
-    List<String> gourmetList = new ArrayList<>();
-    for (Object[] obj : reviewList) {
-      String temp = obj[0] + " " + obj[1] + " " + obj[2] + " " + obj[3] + " " + obj[4] + " " + obj[5];
-      gourmetList.add(temp);
-    }
-    return new RestaurantResponse(gourmetList,RtnCode.FIND_SUCCESS.getMessage());
+    return new RestaurantResponse(restaurantList, menuList, RtnCode.FIND_SUCCESS.getMessage());
   }
 
-  public RestaurantResponse deleteRestaurant(String resName){
-    if (isNull(resName)){
+  @Override
+  public RestaurantResponse findRestaurantByReviewGreaterThan(double review) {
+    // 判斷輸入評價1~5
+    if (review < 1 || review > 5) {
+      return new RestaurantResponse(RtnCode.INPUT_NOT_ALLOWED_VALUE_ERROR.getMessage());
+    }
+    // 透過SQL語法取得review以上的所有餐廳及餐廳菜單
+    List<Object[]> reviewList = rDao.findRestaurantByReviewGreaterThan(review);
+    // 將獲得資料轉成字串
+    List<String> gourmetList = new ArrayList<>();
+    for (Object[] obj : reviewList) {
+      String temp = obj[0] + " " + obj[1] + " " + obj[2] + " " + obj[3] + " " + obj[4] + " " + obj[5];
+      gourmetList.add(temp);
+    }
+    return new RestaurantResponse(gourmetList, RtnCode.FIND_SUCCESS.getMessage());
+  }
+
+  @Override
+  public RestaurantResponse findRestaurantAndMenuByReview(double review) {
+    // 判斷輸入評價1~5
+    if (review < 1 || review > 5) {
+      return new RestaurantResponse(RtnCode.INPUT_NOT_ALLOWED_VALUE_ERROR.getMessage());
+    }
+    // 透過SQL語法取得review以上的所有餐廳及餐廳菜單
+    List<Object[]> reviewList = rDao.findRestaurantAndMenuByReview(review);
+    // 將獲得資料轉成字串
+    List<String> gourmetList = new ArrayList<>();
+    for (Object[] obj : reviewList) {
+      String temp = obj[0] + " " + obj[1] + " " + obj[2] + " " + obj[3] + " " + obj[4] + " " + obj[5];
+      gourmetList.add(temp);
+    }
+    return new RestaurantResponse(gourmetList, RtnCode.FIND_SUCCESS.getMessage());
+  }
+
+  public RestaurantResponse deleteRestaurant(String resName) {
+    // 檢查是否為空
+    if (isNull(resName)) {
       return new RestaurantResponse(RtnCode.INPUT_NOT_ALLOWED_VALUE_ERROR.getMessage());
     }
     mDao.deleteByResName(resName);
@@ -179,17 +177,5 @@ public class RestaurantImpl implements RestaurantService {
     return false;
   }
 
-  private double review(Menu m) {
-    // 取出餐點評價
-    double mReview = m.getReview();
-    // 取得同餐廳所有餐點
-    List<Menu> menuList = mDao.findByResName(m.getResName());
-    // 取得餐點數量，即評價的分母
-    int count = menuList.size() + 1;
-    for (Menu menu : menuList) {
-      double menuReview = menu.getReview();
-      mReview = mReview + menuReview;
-    }
-    return (mReview / count);
-  }
+
 }
