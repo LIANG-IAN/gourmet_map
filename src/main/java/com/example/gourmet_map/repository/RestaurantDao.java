@@ -19,15 +19,15 @@ public interface RestaurantDao extends JpaRepository<Restaurant, String> {
   // select 1，1不重要可以寫任何數字
   @Transactional
   @Modifying
-  @Query(value = "insert into restaurant(resName,address)select :inputResName, :inputAddress where " +
-          "not exists(select 1 from restaurant  where resName = :inputRes)", nativeQuery = true)
+  @Query(value = "insert into restaurant(res_name,address)select :inputResName, :inputAddress where " +
+          "not exists(select 1 from restaurant  where res_name = :inputResName)", nativeQuery = true)
   int addRestaurant(
           @Param("inputResName") String inputResName,
           @Param("inputAddress") String inputAddress
   );
 
 
-  @Query(value = "select r.res_name, r.address, r.review  from Restaurant r  " +
+  @Query(value = "select r.res_name, r.address, r.review  from restaurant r  " +
           "where r.address = :city order by r.res_name limit :i", nativeQuery = true)
   List<Restaurant> findByAddressWithIndex(
           @Param("city") String city,
@@ -44,4 +44,16 @@ public interface RestaurantDao extends JpaRepository<Restaurant, String> {
   @Transactional
   @Modifying
   void deleteByResName(String resName);
+
+  @Query(value = "select r.res_name, r.address, r.review  from restaurant r where r.res_name LIKE %:keywordA% OR r.res_name LIKE %:keywordB% OR r.res_name LIKE %:keywordC%",nativeQuery = true)
+  List<Restaurant> findByALotName1(
+          @Param("keywordA")String keywordA,
+          @Param("keywordB")String keywordB,
+          @Param("keywordC")String keywordC
+  );
+
+  @Query(value = "select r.res_name, r.address, r.review  from restaurant r where r.res_name regexp :regexp ",nativeQuery = true)
+  List<Restaurant> findByALotName2(
+          @Param("regexp")String regexp
+  );
 }

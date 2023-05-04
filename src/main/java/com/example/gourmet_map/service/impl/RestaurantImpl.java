@@ -7,6 +7,7 @@ import com.example.gourmet_map.repository.MenuDao;
 import com.example.gourmet_map.repository.RestaurantDao;
 import com.example.gourmet_map.service.ifs.RestaurantService;
 import com.example.gourmet_map.vo.RestaurantResponse;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;

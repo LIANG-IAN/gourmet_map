@@ -1,6 +1,8 @@
 package com.example.gourmet_map;
 
 import com.example.gourmet_map.constants.RtnCode;
+import com.example.gourmet_map.entity.Restaurant;
+import com.example.gourmet_map.repository.RestaurantDao;
 import com.example.gourmet_map.service.impl.RestaurantImpl;
 import com.example.gourmet_map.vo.RestaurantResponse;
 import org.junit.jupiter.api.Test;
@@ -27,10 +29,13 @@ class GourmetMapApplicationTests {
   @Autowired
   RestaurantImpl restaurant;
 
+  @Autowired
+  RestaurantDao restaurantDao;
+
   // 新增餐廳：成功
   @Test
   public void addRestaurant1() {
-    RestaurantResponse response = restaurant.addRestaurant("鼎泰豐", "台北");
+    RestaurantResponse response = restaurant.addRestaurant("鼎王", "台北");
     Assert.isTrue(response.getMessage().equals(RtnCode.ADD_RESTAURANT_SUCCESS.getMessage()), "");
   }
 
@@ -146,5 +151,21 @@ class GourmetMapApplicationTests {
   public void deleteRestaurant2(){
     RestaurantResponse response =  restaurant.deleteRestaurant(null);
     Assert.isTrue(response.getMessage().equals(RtnCode.INPUT_NOT_ALLOWED_VALUE_ERROR.getMessage()), "");
+  }
+
+  @Test
+  public void findByALotName1(){
+    List<Restaurant> r = restaurantDao.findByALotName1("十","摩","張");
+    for (Restaurant restaurant1 : r) {
+      System.out.println(restaurant1.getResName());
+    }
+  }
+
+  @Test
+  public void findByALotName2(){
+    List<Restaurant> r = restaurantDao.findByALotName2("十|摩|張");
+    for (Restaurant restaurant1 : r) {
+      System.out.println(restaurant1.getResName());
+    }
   }
 }

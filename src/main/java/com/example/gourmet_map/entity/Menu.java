@@ -1,6 +1,8 @@
 package com.example.gourmet_map.entity;
 
+
 import jakarta.persistence.*;
+
 
 @Entity
 @Table(name = "menu")
