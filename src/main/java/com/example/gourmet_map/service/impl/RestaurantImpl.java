@@ -13,9 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class RestaurantImpl implements RestaurantService {
@@ -132,13 +130,9 @@ public class RestaurantImpl implements RestaurantService {
       return new RestaurantResponse(RtnCode.INPUT_NOT_ALLOWED_VALUE_ERROR.getMessage());
     }
     // 透過SQL語法取得review以上的所有餐廳及餐廳菜單
-    List<Object[]> reviewList = rDao.findRestaurantByReviewGreaterThan(review);
+    List<Map<String,Object>> reviewList = rDao.findRestaurantByReviewGreaterThan(review);
     // 將獲得資料轉成字串
-    List<String> gourmetList = new ArrayList<>();
-    for (Object[] obj : reviewList) {
-      String temp = obj[0] + " " + obj[1] + " " + obj[2] + " " + obj[3] + " " + obj[4] + " " + obj[5];
-      gourmetList.add(temp);
-    }
+    List<String> gourmetList = mapArrayToString(reviewList);
     return new RestaurantResponse(gourmetList, RtnCode.FIND_SUCCESS.getMessage());
   }
 
@@ -149,13 +143,9 @@ public class RestaurantImpl implements RestaurantService {
       return new RestaurantResponse(RtnCode.INPUT_NOT_ALLOWED_VALUE_ERROR.getMessage());
     }
     // 透過SQL語法取得review以上的所有餐廳及餐廳菜單
-    List<Object[]> reviewList = rDao.findRestaurantAndMenuByReview(review);
+    List<Map<String,Object>> reviewList = rDao.findRestaurantAndMenuByReview(review);
     // 將獲得資料轉成字串
-    List<String> gourmetList = new ArrayList<>();
-    for (Object[] obj : reviewList) {
-      String temp = obj[0] + " " + obj[1] + " " + obj[2] + " " + obj[3] + " " + obj[4] + " " + obj[5];
-      gourmetList.add(temp);
-    }
+    List<String> gourmetList = mapArrayToString(reviewList);
     return new RestaurantResponse(gourmetList, RtnCode.FIND_SUCCESS.getMessage());
   }
 
@@ -178,5 +168,15 @@ public class RestaurantImpl implements RestaurantService {
     return false;
   }
 
-
+  private List<String> mapArrayToString(List<Map<String,Object>> temp) {
+    List<String> bookSalesList = new ArrayList<>();
+    for (Map<String, Object> map : temp) {
+      Set<String> keySet =map.keySet();
+      for (String s : keySet) {
+        bookSalesList.add(s+": ");
+        bookSalesList.add(map.get(s).toString());
+      }
+    }
+    return bookSalesList;
+  }
 }

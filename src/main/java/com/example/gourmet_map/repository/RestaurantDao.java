@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Repository
@@ -36,10 +37,10 @@ public interface RestaurantDao extends JpaRepository<Restaurant, String> {
 
   @Query(value = "SELECT r.res_name, r.address, r.review, m.meal, m.price, m.review FROM restaurant r " +
           "JOIN menu m ON r.res_name = m.res_name where r.review >= :i", nativeQuery = true)
-  List<Object[]> findRestaurantByReviewGreaterThan(@Param("i") double index);
+  List<Map<String,Object>> findRestaurantByReviewGreaterThan(@Param("i") double index);
 
   @Query(value = "SELECT r.res_name, r.address, r.review, m.meal, m.price, m.review FROM restaurant r JOIN menu m ON r.res_name = m.res_name where r.review >= :i and m.review >=:i", nativeQuery = true)
-  List<Object[]> findRestaurantAndMenuByReview(@Param("i") double index);
+  List<Map<String,Object>> findRestaurantAndMenuByReview(@Param("i") double index);
 
   @Transactional
   @Modifying
